@@ -64,6 +64,11 @@ Let's extract CSS rulesets from the document:
 
 ```
 ./html2less.py test.html
+```
+
+Resulting test.less stylesheet:
+
+```
 #container {
   /* enter your CSS here... */
   header {
