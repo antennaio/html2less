@@ -19,7 +19,8 @@ class Html2Less(object):
     def __init__(self):
         self.prog = os.path.basename(sys.argv[0])
 
-        parser = OptionParser(version="%prog 0.1", usage="%prog [options] input files")
+        parser = OptionParser(version="%prog 0.1", usage="%prog [options] [input files]\n" \
+            "This program will read from stdin if no input files are specified.")
         parser.add_option("-d", "--delimiter", dest="delimiter", default='spaces',
             help="Delimiter: tabs or spaces? Default: spaces")
         parser.add_option("-c", "--clean", action="store_true", dest="clean_mode", default=False,
@@ -29,9 +30,6 @@ class Html2Less(object):
 
         if self.options.delimiter and self.options.delimiter not in ['tabs', 'spaces']:
             parser.error("Accepted delimiter value: 'tabs' or 'spaces'")
-
-        if not self.args:
-            parser.error("no input files specified")
 
     def identify_ruleset(self, elem):
         """Identify a ruleset - give precedence to: A) id, B) class, C) tag name."""
@@ -84,10 +82,39 @@ class Html2Less(object):
         return css.strip()
 
     def run(self):
-        for file in self.args:
-            f = open(file, "r")
-            content = f.read()
-            print self.parse(content)
+        if self.args:
+            for read_from in self.args:
+                write_to = os.path.splitext(read_from)[0] + '.less'
+                choice, content = '', ''
+
+                if (os.path.exists(write_to)):
+                    while True:
+                        print '%s already exists, overwrite? (y/n):' % write_to
+                        choice = raw_input()
+                        if choice in ['y', 'n', 'Y', 'N']:
+                            break
+
+                if choice not in ['n', 'N']:
+                    try:
+                        f = open(read_from, "r")
+                        try:
+                            content = f.read()
+                            try:
+                                f = open(write_to, "w")
+                                try:
+                                    f.write(self.parse(content))
+                                finally:
+                                    f.close()
+                            except IOError:
+                                print 'There was an error writing to %s.' % write_to
+
+                        finally:
+                            f.close()
+                    except IOError:
+                        print 'There was an error reading %s.' % read_from
+
+        else:
+            sys.stdout.write(self.parse(sys.stdin.read()))
 
 if __name__ == '__main__':
     importer = Html2Less()
