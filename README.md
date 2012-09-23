@@ -9,7 +9,8 @@ What it does?
 ```
 ./html2less.py --help
 
-Usage: html2less.py [options] input files
+Usage: html2less.py [options] [input files]
+This program will read from stdin if no input files are specified.
 
 Options:
   --version             show program's version number and exit
